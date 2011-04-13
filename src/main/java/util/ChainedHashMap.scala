@@ -222,22 +222,25 @@ class ChainedHashMap[Key, Value](expectedSize : Int) extends scala.collection.mu
     );  
   }
   
+/*
   override def values: Iterator[Value] = new Iterator[Value] {
     val it = new EntryIterator
     def hasNext = it.hasNext
     def next = it.next.value
   }
-  
+ */ 
   /* Override to avoid tuple allocation in foreach */
   override def keySet: collection.Set[Key] = new DefaultKeySet {
     override def foreach[C](f: Key => C) = foreachEntry(e => f(e.key))
   }
   
   /* Override to avoid tuple allocation in foreach */
-  override def valuesIterable: collection.Iterable[Value] = new DefaultValuesIterable {
+/*
+  override def valuesIterator: collection.Iterator[Value] = new DefaultValuesIterator {
     override def foreach[C](f: Value => C) = foreachEntry(e => f(e.value))
   }
-  
+ */ 
+
   /* Override to avoid tuple allocation */
   override def keysIterator: Iterator[Key] = new Iterator[Key] {
     val iter = new EntryIterator
