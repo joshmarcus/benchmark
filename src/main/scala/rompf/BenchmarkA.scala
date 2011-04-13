@@ -318,22 +318,10 @@ object BenchATrellisRawIntArrayIndexedWithFunction extends Benchmark {
   runner.run()
   runner.run()
 
-
-/*
-   def _run() {
-    val it = buf
-    var i = 0
-    val f = getFunction(flag)
-    while (i < it.length) {
-      if (f(it(i)))
-        println("strange element")
-      i += 1
-    }
-  }
-*/
   def run() {
     runner.run()
   }
+
 }
 
 
