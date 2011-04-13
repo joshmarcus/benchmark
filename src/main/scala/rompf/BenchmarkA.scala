@@ -6,7 +6,7 @@ import scala.testing.Benchmark
 /* Initially retrieved from http://lamp.epfl.ch/~rompf/vector2/ */
 object SettingsA {
 //  val N = 32*1024
-  val N = 1000000
+  val N = 2000000
   override def toString = "[N="+N+"]"
 }
 
@@ -134,31 +134,6 @@ object BenchAArrayIndexed extends Benchmark {
 
 }
 
-object BenchARawArrayIndexed extends Benchmark {
-  override def prefix = super.prefix + "/" + SettingsA
-
-  val buf = {
-    val x: AnyRef = "x"
-    val buf = new Array[AnyRef](SettingsA.N)
-    var i = 0
-    while (i < SettingsA.N) {
-      buf(i) = x
-      i += 1
-    }
-    buf
-  }
-  
-  def run() {
-    val it = buf
-    var i = 0
-    while (i < it.length) {
-      if (it(i) eq null)
-        println("strange element")
-      i += 1
-    }
-  }
-
-}
 
 object BenchARawArrayForeach extends Benchmark {
   override def prefix = super.prefix + "/" + SettingsA
@@ -193,7 +168,8 @@ object BenchARawArrayForeachMega extends Benchmark {
     }
     buf.foreach(x => if (x == "mmm") println("strange element"))
     buf.foreach(x => if (x == "yyy") println("strange element"))
-    buf.foreach(x => if (x == "sss") println("strange element"))
+//    buf.foreach(x => if (x == "sss") println("strange element"))
+ //   Thread.sleep(5000)
     buf
   }
   
@@ -201,7 +177,195 @@ object BenchARawArrayForeachMega extends Benchmark {
     val it = buf
     it.foreach(x => if (x eq null) println("strange element"))
   }
+
 }
+
+object BenchARawArrayIndexed extends Benchmark {
+  override def prefix = super.prefix + "/" + SettingsA
+
+  val buf = {
+    val x: AnyRef = "x"
+    val buf = new Array[AnyRef](SettingsA.N)
+    var i = 0
+    while (i < SettingsA.N) {
+      buf(i) = x
+      i += 1
+    }
+    buf
+  }
+
+  def run() {
+    val it = buf
+    var i = 0
+    while (i < it.length) {
+      if (it(i) eq null)
+        println("strange element")
+      i += 1
+    }
+  }
+
+}
+
+object BenchATrellisRawIntArray extends Benchmark {
+  override def prefix = super.prefix + "/" + SettingsA
+
+  val buf = {
+    val x: Int = 4 
+    val buf = new Array[Int](SettingsA.N)
+    var i = 0
+    while (i < SettingsA.N) {
+      buf(i) = x
+      i += 1
+    }
+    buf
+  }
+
+  def run() {
+    //val it = buf
+    buf.foreach(x => if (x == 3) println("strange element"))
+  }
+}
+
+object BenchATrellisRawIntArrayIndexed extends Benchmark {
+  override def prefix = super.prefix + "/" + SettingsA
+
+  val buf = {
+    val x:Int = 4
+    val buf = new Array[Int](SettingsA.N)
+    var i = 0
+    while (i < SettingsA.N) {
+      buf(i) = x
+      i += 1
+    }
+    buf
+  }
+ 
+  def run() {
+    val it = buf
+    var i = 0
+    while (i < it.length) {
+      if (it(i) == 3)
+        println("strange element")
+      i += 1
+    }
+  }
+
+}
+
+object BenchATrellisRawIntArrayIndexedUntil extends Benchmark {
+  override def prefix = super.prefix + "/" + SettingsA
+
+  val buf = {
+    val x:Int = 4
+    val buf = new Array[Int](SettingsA.N)
+    var i = 0
+    while (i < SettingsA.N) {
+      buf(i) = x
+      i += 1
+    }
+    buf
+  }
+ 
+  def run() {
+    val it = buf
+    for (i <- 0 until it.length) {
+      if (it(i) == 3)
+        println("strange element")
+    }
+  }
+
+}
+
+object FunctionGiver {
+  def getFunction() = {
+    { x:Int => { x == 3 } }
+  }
+}
+
+
+class Runner ( f: (Int) => Boolean, buf: Array[Int] ) {
+  def run() {
+    val it = buf
+    var i = 0
+    while (i < it.length) {
+      if (f(it(i)))
+        println("strange element")
+      i += 1
+    }
+  }
+}
+
+import java.util.Random
+
+object BenchATrellisRawIntArrayIndexedWithFunction extends Benchmark {
+  override def prefix = super.prefix + "/" + SettingsA
+  def getFunction(flag:Boolean) = {
+    if (flag) { x:Int => { x == 3 } } else { x:Int => { x == 4 } } 
+  }
+
+  val buf = {
+    val x:Int = 4
+    val buf = new Array[Int](SettingsA.N)
+    var i = 0
+    while (i < SettingsA.N) {
+      buf(i) = x
+      i += 1
+    }
+    buf
+  }
+  val runner = new Runner( { x:Int => { x == 3 } }, buf )
+
+  runner.run()
+  runner.run()
+
+
+/*
+   def _run() {
+    val it = buf
+    var i = 0
+    val f = getFunction(flag)
+    while (i < it.length) {
+      if (f(it(i)))
+        println("strange element")
+      i += 1
+    }
+  }
+*/
+  def run() {
+    runner.run()
+  }
+}
+
+
+object BenchATrellisRawIntArrayIndexedWithFunctionCall extends Benchmark {
+  override def prefix = super.prefix + "/" + SettingsA
+
+  val buf = {
+    val x:Int = 4
+    val buf = new Array[Int](SettingsA.N)
+    var i = 0
+    while (i < SettingsA.N) {
+      buf(i) = x
+      i += 1
+    }
+    buf
+  }
+ 
+  def test(x:Int) = { x == 3 }
+
+  def run() {
+    val it = buf
+    var i = 0
+    while (i < it.length) {
+      if (test(it(i)))
+        println("strange element")
+      i += 1
+    }
+  }
+
+}
+
+
 
 object BenchARawArrayIte extends Benchmark {
   override def prefix = super.prefix + "/" + SettingsA
